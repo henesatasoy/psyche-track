@@ -44,7 +44,7 @@ export function useAuth() {
     if (error) {
       // Handle duplicate user error
       if (error.message.includes("already registered")) {
-        return { data: null, error: { message: "This username is already taken. Please choose another." } };
+        return { data: null, error: { message: "Bu kullanıcı adı zaten alınmış. Lütfen başka bir tane seçin." } };
       }
       return { data: null, error };
     }
@@ -62,7 +62,7 @@ export function useAuth() {
 
     if (error) {
       if (error.message.includes("Invalid login credentials")) {
-        return { data: null, error: { message: "Invalid username or password." } };
+        return { data: null, error: { message: "Geçersiz kullanıcı adı veya şifre." } };
       }
       return { data: null, error };
     }
