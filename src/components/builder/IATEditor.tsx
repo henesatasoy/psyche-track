@@ -284,20 +284,42 @@ export function IATEditor({ block, onChange }: IATEditorProps) {
       {/* Settings Row */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="time-limit">Zaman Sınırı (ms)</Label>
-          <Input
-            id="time-limit"
-            type="number"
-            min={500}
-            max={10000}
-            step={100}
-            value={block.timeLimit}
-            onChange={(e) =>
-              onChange({ ...block, timeLimit: parseInt(e.target.value) || 3000 })
-            }
-          />
+          <Label htmlFor="time-limit">Zaman Sınırı</Label>
+          <Select
+            value={block.timeLimit === 0 ? "unlimited" : "limited"}
+            onValueChange={(value) => {
+              if (value === "unlimited") {
+                onChange({ ...block, timeLimit: 0 });
+              } else {
+                onChange({ ...block, timeLimit: 3000 });
+              }
+            }}
+          >
+            <SelectTrigger id="time-limit">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-popover">
+              <SelectItem value="limited">Sınırlı</SelectItem>
+              <SelectItem value="unlimited">Sınırsız</SelectItem>
+            </SelectContent>
+          </Select>
+          {block.timeLimit !== 0 && (
+            <Input
+              type="number"
+              min={500}
+              max={10000}
+              step={100}
+              value={block.timeLimit}
+              onChange={(e) =>
+                onChange({ ...block, timeLimit: parseInt(e.target.value) || 3000 })
+              }
+              className="mt-2"
+            />
+          )}
           <p className="text-xs text-muted-foreground">
-            Zaman aşımından önce maksimum yanıt süresi (500-10000ms)
+            {block.timeLimit === 0 
+              ? "Katılımcı istediği kadar zaman alabilir" 
+              : "Zaman aşımından önce maksimum yanıt süresi (500-10000ms)"}
           </p>
         </div>
 
