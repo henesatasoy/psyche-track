@@ -120,10 +120,12 @@ export function IATRunner({ block, onComplete, progress }: IATRunnerProps) {
       setState("stimulus");
       stimulusStartTime.current = performance.now();
 
-      // Set timeout
-      timeoutRef.current = setTimeout(() => {
-        handleTimeout();
-      }, block.timeLimit);
+      // Set timeout only if time limit is set (not unlimited)
+      if (block.timeLimit > 0) {
+        timeoutRef.current = setTimeout(() => {
+          handleTimeout();
+        }, block.timeLimit);
+      }
     }, 500);
   };
 
@@ -174,10 +176,12 @@ export function IATRunner({ block, onComplete, progress }: IATRunnerProps) {
         setState("stimulus");
         stimulusStartTime.current = performance.now();
 
-        // Reset timeout
-        timeoutRef.current = setTimeout(() => {
-          handleTimeout();
-        }, block.timeLimit);
+        // Reset timeout only if time limit is set (not unlimited)
+        if (block.timeLimit > 0) {
+          timeoutRef.current = setTimeout(() => {
+            handleTimeout();
+          }, block.timeLimit);
+        }
       }, 300);
     } else if (block.feedbackType === "flash") {
       // Brief error flash, then advance
