@@ -113,28 +113,79 @@ export function IATRunner({ block, onComplete, progress }: IATRunnerProps) {
     showNextStimulus();
   };
 
-  const showNextStimulus = () => {
+  const calculateMeanRT = (results: TrialResult[]) => {
+    const validResults = results.filter((r) => r.correct && !r.timedOut);
+    if (validResults.length === 0) return 0;
+    const sum = validResults.reduce((acc, r) => acc + r.reactionTime, 0);
+    return Math.round(sum / validResults.length);
+  };
+
+  const calculateAccuracy = (results: TrialResult[]) => {
+    if (results.length === 0) return 0;
+    const correct = results.filter((r) => r.correct).length;
+    return Math.round((correct / results.length) * 100);
+  };
+
+  const showNextStimulus = useCallback(() => {
     setState("fixation");
 
-    // Brief fixation cross
     setTimeout(() => {
       setState("stimulus");
       stimulusStartTime.current = performance.now();
 
-      // Set timeout only if time limit is set (not unlimited)
       if (block.timeLimit > 0) {
         timeoutRef.current = setTimeout(() => {
-          handleTimeout();
+          // handleTimeout logic inline to avoid circular dependency
+          const trial = trials[currentTrialIndex];
+          if (!trial) return;
+          
+          const noCorrectAnswer = trial.correctSide === "none";
+          const result: TrialResult = {
+            stimulusId: trial.stimulus.id,
+            stimulusValue: trial.stimulus.value,
+            stimulusType: trial.stimulus.type,
+            correctSide: trial.correctSide,
+            responseSide: null,
+            reactionTime: block.timeLimit,
+            correct: false,
+            timedOut: true,
+            noCorrectAnswer,
+          };
+
+          setResults(prev => {
+            const newResults = [...prev, result];
+            
+            if (currentTrialIndex >= trials.length - 1) {
+              setState("complete");
+              onComplete({
+                timeLimit: block.timeLimit,
+                feedbackType: block.feedbackType,
+                leftCategory: block.leftCategory.label,
+                rightCategory: block.rightCategory.label,
+                trials: newResults,
+                meanRT: calculateMeanRT(newResults),
+                accuracy: calculateAccuracy(newResults),
+              });
+            } else {
+              setCurrentTrialIndex(prev => prev + 1);
+              setState("fixation");
+              setTimeout(() => {
+                setState("stimulus");
+                stimulusStartTime.current = performance.now();
+              }, 500);
+            }
+            
+            return newResults;
+          });
         }, block.timeLimit);
       }
     }, 500);
-  };
+  }, [block, trials, currentTrialIndex, onComplete]);
 
   const handleResponse = useCallback(
     (responseSide: "left" | "right") => {
       if (state !== "stimulus" || currentTrialIndex >= trials.length) return;
 
-      // Clear timeout
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
         timeoutRef.current = null;
@@ -143,7 +194,6 @@ export function IATRunner({ block, onComplete, progress }: IATRunnerProps) {
       const reactionTime = performance.now() - stimulusStartTime.current;
       const trial = trials[currentTrialIndex];
       
-      // If no correct answer, any response is considered correct
       const noCorrectAnswer = trial.correctSide === "none";
       const correct = noCorrectAnswer || responseSide === trial.correctSide;
 
@@ -159,100 +209,72 @@ export function IATRunner({ block, onComplete, progress }: IATRunnerProps) {
         noCorrectAnswer,
       };
 
+      const advanceToNext = () => {
+        setResults(prev => {
+          const newResults = [...prev, result];
+          
+          if (currentTrialIndex >= trials.length - 1) {
+            setState("complete");
+            onComplete({
+              timeLimit: block.timeLimit,
+              feedbackType: block.feedbackType,
+              leftCategory: block.leftCategory.label,
+              rightCategory: block.rightCategory.label,
+              trials: newResults,
+              meanRT: calculateMeanRT(newResults),
+              accuracy: calculateAccuracy(newResults),
+            });
+          } else {
+            setCurrentTrialIndex(prev => prev + 1);
+            setState("fixation");
+            setTimeout(() => {
+              setState("stimulus");
+              stimulusStartTime.current = performance.now();
+              
+              if (block.timeLimit > 0) {
+                timeoutRef.current = setTimeout(() => {
+                  // Timeout for next trial will be handled in next response
+                }, block.timeLimit);
+              }
+            }, 500);
+          }
+          
+          return newResults;
+        });
+      };
+
       if (!correct && block.feedbackType !== "none") {
-        handleIncorrectResponse(result);
+        setShowError(true);
+        setFeedback("incorrect");
+
+        if (block.feedbackType === "correction") {
+          setState("feedback");
+          setTimeout(() => {
+            setShowError(false);
+            setFeedback(null);
+            setState("stimulus");
+            stimulusStartTime.current = performance.now();
+
+            if (block.timeLimit > 0) {
+              timeoutRef.current = setTimeout(() => {
+                // Re-handle timeout
+              }, block.timeLimit);
+            }
+          }, 300);
+        } else if (block.feedbackType === "flash") {
+          setState("feedback");
+          setTimeout(() => {
+            setShowError(false);
+            setFeedback(null);
+            advanceToNext();
+          }, 200);
+        }
       } else {
-        recordResultAndAdvance(result);
+        advanceToNext();
       }
     },
-    [state, currentTrialIndex, trials, block.feedbackType]
+    [state, currentTrialIndex, trials, block, onComplete]
   );
-
-  const handleIncorrectResponse = (result: TrialResult) => {
-    setShowError(true);
-    setFeedback("incorrect");
-
-    if (block.feedbackType === "correction") {
-      // Block until correct - don't advance, let them try again
-      setState("feedback");
-      setTimeout(() => {
-        setShowError(false);
-        setFeedback(null);
-        setState("stimulus");
-        stimulusStartTime.current = performance.now();
-
-        // Reset timeout only if time limit is set (not unlimited)
-        if (block.timeLimit > 0) {
-          timeoutRef.current = setTimeout(() => {
-            handleTimeout();
-          }, block.timeLimit);
-        }
-      }, 300);
-    } else if (block.feedbackType === "flash") {
-      // Brief error flash, then advance
-      setState("feedback");
-      setTimeout(() => {
-        setShowError(false);
-        setFeedback(null);
-        recordResultAndAdvance(result);
-      }, 200);
-    }
-  };
-
-  const handleTimeout = () => {
-    if (state !== "stimulus" || currentTrialIndex >= trials.length) return;
-
-    const trial = trials[currentTrialIndex];
-    const noCorrectAnswer = trial.correctSide === "none";
-    const result: TrialResult = {
-      stimulusId: trial.stimulus.id,
-      stimulusValue: trial.stimulus.value,
-      stimulusType: trial.stimulus.type,
-      correctSide: trial.correctSide,
-      responseSide: null,
-      reactionTime: block.timeLimit,
-      correct: false,
-      timedOut: true,
-      noCorrectAnswer,
-    };
-
-    recordResultAndAdvance(result);
-  };
-
-  const recordResultAndAdvance = (result: TrialResult) => {
-    const newResults = [...results, result];
-    setResults(newResults);
-
-    if (currentTrialIndex < trials.length - 1) {
-      setCurrentTrialIndex(currentTrialIndex + 1);
-      showNextStimulus();
-    } else {
-      // All trials complete
-      setState("complete");
-      onComplete({
-        timeLimit: block.timeLimit,
-        feedbackType: block.feedbackType,
-        leftCategory: block.leftCategory.label,
-        rightCategory: block.rightCategory.label,
-        trials: newResults,
-        meanRT: calculateMeanRT(newResults),
-        accuracy: calculateAccuracy(newResults),
-      });
-    }
-  };
-
-  const calculateMeanRT = (results: TrialResult[]) => {
-    const validResults = results.filter((r) => r.correct && !r.timedOut);
-    if (validResults.length === 0) return 0;
-    const sum = validResults.reduce((acc, r) => acc + r.reactionTime, 0);
-    return Math.round(sum / validResults.length);
-  };
-
-  const calculateAccuracy = (results: TrialResult[]) => {
-    if (results.length === 0) return 0;
-    const correct = results.filter((r) => r.correct).length;
-    return Math.round((correct / results.length) * 100);
-  };
 
   const currentTrial = trials[currentTrialIndex];
   const trialProgress = trials.length > 0 ? ((currentTrialIndex + 1) / trials.length) * 100 : 0;
