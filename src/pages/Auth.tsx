@@ -14,13 +14,13 @@ import { Loader2, FlaskConical } from "lucide-react";
 const authSchema = z.object({
   username: z
     .string()
-    .min(3, "Username must be at least 3 characters")
-    .max(30, "Username must be less than 30 characters")
-    .regex(/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers, and underscores"),
+    .min(3, "Kullanıcı adı en az 3 karakter olmalıdır")
+    .max(30, "Kullanıcı adı 30 karakterden az olmalıdır")
+    .regex(/^[a-zA-Z0-9_]+$/, "Kullanıcı adı sadece harf, rakam ve alt çizgi içerebilir"),
   password: z
     .string()
-    .min(6, "Password must be at least 6 characters")
-    .max(72, "Password must be less than 72 characters"),
+    .min(6, "Şifre en az 6 karakter olmalıdır")
+    .max(72, "Şifre 72 karakterden az olmalıdır"),
 });
 
 type AuthFormData = z.infer<typeof authSchema>;
@@ -56,13 +56,13 @@ export default function Auth() {
         if (error) {
           toast({
             variant: "destructive",
-            title: "Login Failed",
+            title: "Giriş Başarısız",
             description: error.message,
           });
         } else {
           toast({
-            title: "Welcome back!",
-            description: "You have successfully logged in.",
+            title: "Tekrar hoş geldiniz!",
+            description: "Başarıyla giriş yaptınız.",
           });
           navigate("/dashboard", { replace: true });
         }
@@ -71,13 +71,13 @@ export default function Auth() {
         if (error) {
           toast({
             variant: "destructive",
-            title: "Sign Up Failed",
+            title: "Kayıt Başarısız",
             description: error.message,
           });
         } else {
           toast({
-            title: "Account created!",
-            description: "You can now start creating experiments.",
+            title: "Hesap oluşturuldu!",
+            description: "Artık deney oluşturmaya başlayabilirsiniz.",
           });
           navigate("/dashboard", { replace: true });
         }
@@ -103,19 +103,19 @@ export default function Auth() {
           <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-primary text-primary-foreground mb-4">
             <FlaskConical className="h-7 w-7" />
           </div>
-          <h1 className="text-2xl font-semibold text-foreground">Research Platform</h1>
-          <p className="text-muted-foreground mt-1">Behavioral experiment builder</p>
+          <h1 className="text-2xl font-semibold text-foreground">Araştırma Platformu</h1>
+          <p className="text-muted-foreground mt-1">Davranışsal deney oluşturucu</p>
         </div>
 
         <Card className="border-border/50 shadow-lg">
           <CardHeader className="space-y-1 pb-4">
             <CardTitle className="text-xl">
-              {isLogin ? "Welcome back" : "Create an account"}
+              {isLogin ? "Tekrar hoş geldiniz" : "Hesap oluşturun"}
             </CardTitle>
             <CardDescription>
               {isLogin
-                ? "Enter your credentials to access your experiments"
-                : "Get started with your research platform"}
+                ? "Deneylerinize erişmek için bilgilerinizi girin"
+                : "Araştırma platformunuzla başlayın"}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -126,10 +126,10 @@ export default function Auth() {
                   name="username"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Username</FormLabel>
+                      <FormLabel>Kullanıcı Adı</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Enter your username"
+                          placeholder="Kullanıcı adınızı girin"
                           autoComplete="username"
                           disabled={isSubmitting}
                           {...field}
@@ -145,11 +145,11 @@ export default function Auth() {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Password</FormLabel>
+                      <FormLabel>Şifre</FormLabel>
                       <FormControl>
                         <Input
                           type="password"
-                          placeholder="Enter your password"
+                          placeholder="Şifrenizi girin"
                           autoComplete={isLogin ? "current-password" : "new-password"}
                           disabled={isSubmitting}
                           {...field}
@@ -166,7 +166,7 @@ export default function Auth() {
                   disabled={isSubmitting}
                 >
                   {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  {isLogin ? "Sign In" : "Create Account"}
+                  {isLogin ? "Giriş Yap" : "Hesap Oluştur"}
                 </Button>
               </form>
             </Form>
@@ -181,15 +181,15 @@ export default function Auth() {
                 className="text-sm text-muted-foreground hover:text-primary transition-colors"
               >
                 {isLogin
-                  ? "Don't have an account? Sign up"
-                  : "Already have an account? Sign in"}
+                  ? "Hesabınız yok mu? Kayıt olun"
+                  : "Zaten hesabınız var mı? Giriş yapın"}
               </button>
             </div>
           </CardContent>
         </Card>
 
         <p className="text-center text-xs text-muted-foreground mt-6">
-          By continuing, you agree to conduct ethical research.
+          Devam ederek, etik araştırma yapmayı kabul etmiş olursunuz.
         </p>
       </div>
     </div>
