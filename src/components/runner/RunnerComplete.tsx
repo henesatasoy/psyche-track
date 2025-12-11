@@ -9,15 +9,15 @@ export function RunnerComplete() {
         </div>
 
         <h1 className="text-2xl font-semibold text-foreground mb-3">
-          Thank You!
+          Teşekkür Ederiz!
         </h1>
 
         <p className="text-muted-foreground mb-6">
-          Your responses have been recorded successfully. You may now close this window.
+          Yanıtlarınız başarıyla kaydedildi. Artık bu pencereyi kapatabilirsiniz.
         </p>
 
         <p className="text-sm text-muted-foreground">
-          If you have any questions about this study, please contact the researcher.
+          Bu çalışma hakkında sorularınız varsa, lütfen araştırmacı ile iletişime geçin.
         </p>
       </div>
     </div>

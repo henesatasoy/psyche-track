@@ -38,8 +38,8 @@ export function SurveyRunner({ block, onComplete, progress }: SurveyRunnerProps)
     if (unansweredRequired.length > 0) {
       toast({
         variant: "destructive",
-        title: "Required Questions",
-        description: "Please answer all required questions before continuing.",
+        title: "Zorunlu Sorular",
+        description: "Devam etmeden önce lütfen tüm zorunlu soruları yanıtlayın.",
       });
       return;
     }
@@ -78,7 +78,7 @@ export function SurveyRunner({ block, onComplete, progress }: SurveyRunnerProps)
         <div className="pl-8">
           {question.type === "open" ? (
             <Textarea
-              placeholder="Type your answer here..."
+              placeholder="Yanıtınızı buraya yazın..."
               value={responses[question.id] || ""}
               onChange={(e) => updateResponse(question.id, e.target.value)}
               rows={3}
@@ -138,7 +138,7 @@ export function SurveyRunner({ block, onComplete, progress }: SurveyRunnerProps)
 
           <div className="mt-8 flex justify-center">
             <Button size="lg" onClick={handleSubmit}>
-              Continue
+              Devam Et
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
