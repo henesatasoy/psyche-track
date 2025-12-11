@@ -135,6 +135,25 @@ export function IATEditor({ block, onChange }: IATEditorProps) {
     });
   };
 
+  const updateStimulusCorrectResponse = (
+    side: "left" | "right",
+    stimulusId: string,
+    correctResponse: "left" | "right" | "none"
+  ) => {
+    const key = side === "left" ? "leftCategory" : "rightCategory";
+    const category = block[key];
+
+    onChange({
+      ...block,
+      [key]: {
+        ...category,
+        stimuli: category.stimuli.map((s) =>
+          s.id === stimulusId ? { ...s, correctResponse } : s
+        ),
+      },
+    });
+  };
+
   const deleteStimulus = (side: "left" | "right", stimulusId: string) => {
     const key = side === "left" ? "leftCategory" : "rightCategory";
     const category = block[key];
@@ -251,6 +270,21 @@ export function IATEditor({ block, onChange }: IATEditorProps) {
                         className="flex-1"
                       />
                     )}
+                    <Select
+                      value={stimulus.correctResponse || side}
+                      onValueChange={(value: "left" | "right" | "none") =>
+                        updateStimulusCorrectResponse(side, stimulus.id, value)
+                      }
+                    >
+                      <SelectTrigger className="w-32 h-8 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-popover">
+                        <SelectItem value="left">E (Sol)</SelectItem>
+                        <SelectItem value="right">I (Sağ)</SelectItem>
+                        <SelectItem value="none">Doğru yok</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <Button
                       type="button"
                       variant="ghost"
