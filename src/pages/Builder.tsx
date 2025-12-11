@@ -1,21 +1,264 @@
-import { useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import { useAuth } from "@/hooks/useAuth";
-import { Loader2, ArrowLeft } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
+import {
+  ArrowLeft,
+  Loader2,
+  Save,
+  Play,
+  Copy,
+  FileText,
+} from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { SortableBlock } from "@/components/builder/SortableBlock";
+import { BlockEditor } from "@/components/builder/BlockEditor";
+import { AddBlockMenu } from "@/components/builder/AddBlockMenu";
+import {
+  ExperimentBlock,
+  BlockType,
+  InstructionBlock,
+  SurveyBlock,
+  IATBlock,
+} from "@/types/experiment";
+
+type ExperimentStatus = "draft" | "active" | "closed";
+
+interface ExperimentData {
+  id: string;
+  title: string;
+  status: ExperimentStatus;
+  config: ExperimentBlock[];
+  owner_id: string;
+}
 
 export default function Builder() {
   const { id } = useParams<{ id: string }>();
-  const { isAuthenticated, loading } = useAuth();
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
+  const [experiment, setExperiment] = useState<ExperimentData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  // Redirect if not authenticated
   useEffect(() => {
-    if (!loading && !isAuthenticated) {
+    if (!authLoading && !isAuthenticated) {
       navigate("/auth", { replace: true });
     }
-  }, [loading, isAuthenticated, navigate]);
+  }, [authLoading, isAuthenticated, navigate]);
 
-  if (loading) {
+  // Fetch experiment
+  useEffect(() => {
+    if (id && user) {
+      fetchExperiment();
+    }
+  }, [id, user]);
+
+  const fetchExperiment = async () => {
+    if (!id) return;
+
+    try {
+      const { data, error } = await supabase
+        .from("experiments")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (error) throw error;
+
+      setExperiment({
+        id: data.id,
+        title: data.title,
+        status: data.status as ExperimentStatus,
+        config: (data.config as unknown as ExperimentBlock[]) || [],
+        owner_id: data.owner_id,
+      });
+    } catch (error) {
+      console.error("Error fetching experiment:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to load experiment.",
+      });
+      navigate("/dashboard");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const saveExperiment = useCallback(async () => {
+    if (!experiment || !id) return;
+
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from("experiments")
+        .update({
+          title: experiment.title,
+          status: experiment.status,
+          config: JSON.parse(JSON.stringify(experiment.config)),
+        })
+        .eq("id", id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Saved",
+        description: "Experiment saved successfully.",
+      });
+    } catch (error) {
+      console.error("Error saving experiment:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to save experiment.",
+      });
+    } finally {
+      setSaving(false);
+    }
+  }, [experiment, id, toast]);
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id && experiment) {
+      const oldIndex = experiment.config.findIndex((b) => b.id === active.id);
+      const newIndex = experiment.config.findIndex((b) => b.id === over.id);
+
+      setExperiment({
+        ...experiment,
+        config: arrayMove(experiment.config, oldIndex, newIndex),
+      });
+    }
+  };
+
+  const addBlock = (type: BlockType) => {
+    if (!experiment) return;
+
+    let newBlock: ExperimentBlock;
+    const blockId = crypto.randomUUID();
+
+    switch (type) {
+      case "instruction":
+        newBlock = {
+          id: blockId,
+          type: "instruction",
+          content: "",
+        } as InstructionBlock;
+        break;
+      case "survey":
+        newBlock = {
+          id: blockId,
+          type: "survey",
+          title: "",
+          questions: [],
+        } as SurveyBlock;
+        break;
+      case "iat":
+        newBlock = {
+          id: blockId,
+          type: "iat",
+          timeLimit: 3000,
+          feedbackType: "correction",
+          leftCategory: { id: crypto.randomUUID(), label: "Category A", stimuli: [] },
+          rightCategory: { id: crypto.randomUUID(), label: "Category B", stimuli: [] },
+        } as IATBlock;
+        break;
+      default:
+        return;
+    }
+
+    setExperiment({
+      ...experiment,
+      config: [...experiment.config, newBlock],
+    });
+    setSelectedBlockId(blockId);
+  };
+
+  const updateBlock = (updatedBlock: ExperimentBlock) => {
+    if (!experiment) return;
+
+    setExperiment({
+      ...experiment,
+      config: experiment.config.map((block) =>
+        block.id === updatedBlock.id ? updatedBlock : block
+      ),
+    });
+  };
+
+  const deleteBlock = (blockId: string) => {
+    if (!experiment) return;
+
+    setExperiment({
+      ...experiment,
+      config: experiment.config.filter((block) => block.id !== blockId),
+    });
+
+    if (selectedBlockId === blockId) {
+      setSelectedBlockId(null);
+    }
+  };
+
+  const copyRunLink = () => {
+    if (!id) return;
+    const url = `${window.location.origin}/run/${id}`;
+    navigator.clipboard.writeText(url);
+    toast({
+      title: "Link copied",
+      description: "Participant link copied to clipboard.",
+    });
+  };
+
+  const selectedBlock = experiment?.config.find((b) => b.id === selectedBlockId) || null;
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "active":
+        return "bg-success/10 text-success border-success/20";
+      case "closed":
+        return "bg-muted text-muted-foreground border-border";
+      default:
+        return "bg-warning/10 text-warning border-warning/20";
+    }
+  };
+
+  if (authLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -23,28 +266,130 @@ export default function Builder() {
     );
   }
 
+  if (!experiment) {
+    return null;
+  }
+
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card">
-        <div className="container mx-auto px-4 py-4 flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")}>
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div>
-            <h1 className="text-lg font-semibold text-foreground">Experiment Builder</h1>
-            <p className="text-xs text-muted-foreground">Phase 2 - Coming next</p>
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* Header */}
+      <header className="border-b border-border bg-card flex-shrink-0">
+        <div className="px-4 py-3 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate("/dashboard")}
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+
+            <Input
+              value={experiment.title}
+              onChange={(e) =>
+                setExperiment({ ...experiment, title: e.target.value })
+              }
+              className="max-w-xs font-medium border-transparent hover:border-input focus:border-input"
+              placeholder="Experiment title"
+            />
+
+            <Select
+              value={experiment.status}
+              onValueChange={(value: ExperimentStatus) =>
+                setExperiment({ ...experiment, status: value })
+              }
+            >
+              <SelectTrigger className="w-28 h-8">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-popover">
+                <SelectItem value="draft">Draft</SelectItem>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="closed">Closed</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={copyRunLink}>
+              <Copy className="h-4 w-4 mr-2" />
+              Copy Link
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => window.open(`/run/${id}`, "_blank")}
+            >
+              <Play className="h-4 w-4 mr-2" />
+              Preview
+            </Button>
+            <Button size="sm" onClick={saveExperiment} disabled={saving}>
+              {saving ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Save className="h-4 w-4 mr-2" />
+              )}
+              Save
+            </Button>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="text-center py-16">
-          <h2 className="text-xl font-medium text-foreground mb-2">Builder Coming in Phase 2</h2>
-          <p className="text-muted-foreground">
-            The drag-and-drop experiment builder will be implemented next.
-          </p>
-        </div>
-      </main>
+      {/* Main Content */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Sidebar - Block List */}
+        <aside className="w-72 border-r border-border bg-card p-4 flex flex-col overflow-hidden">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-medium text-foreground">Blocks</h2>
+            <Badge variant="secondary" className="text-xs">
+              {experiment.config.length}
+            </Badge>
+          </div>
+
+          <AddBlockMenu onAdd={addBlock} />
+
+          <div className="mt-4 flex-1 overflow-y-auto space-y-2">
+            {experiment.config.length === 0 ? (
+              <Card className="border-dashed">
+                <CardContent className="py-8 text-center">
+                  <FileText className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">
+                    No blocks yet. Add your first block above.
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <SortableContext
+                  items={experiment.config.map((b) => b.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {experiment.config.map((block) => (
+                    <SortableBlock
+                      key={block.id}
+                      block={block}
+                      isSelected={selectedBlockId === block.id}
+                      onSelect={() => setSelectedBlockId(block.id)}
+                      onDelete={() => deleteBlock(block.id)}
+                    />
+                  ))}
+                </SortableContext>
+              </DndContext>
+            )}
+          </div>
+        </aside>
+
+        {/* Editor Panel */}
+        <main className="flex-1 p-6 overflow-y-auto">
+          <div className="max-w-2xl mx-auto">
+            <BlockEditor block={selectedBlock} onChange={updateBlock} />
+          </div>
+        </main>
+      </div>
     </div>
   );
 }
