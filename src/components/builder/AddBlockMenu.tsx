@@ -28,9 +28,8 @@ const blockOptions = [
   {
     type: "iat" as BlockType,
     label: "IAT Block",
-    description: "Implicit Association Test (Phase 3)",
+    description: "Implicit Association Test task",
     icon: Brain,
-    disabled: true,
   },
 ];
 
@@ -47,8 +46,7 @@ export function AddBlockMenu({ onAdd }: AddBlockMenuProps) {
         {blockOptions.map((option) => (
           <DropdownMenuItem
             key={option.type}
-            onClick={() => !option.disabled && onAdd(option.type)}
-            disabled={option.disabled}
+            onClick={() => onAdd(option.type)}
             className="flex items-start gap-3 p-3"
           >
             <div className="flex items-center justify-center w-8 h-8 rounded-md bg-primary/10 text-primary flex-shrink-0">
