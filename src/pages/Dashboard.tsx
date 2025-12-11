@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { generateCSV, downloadCSV } from "@/lib/csvExport";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import {
   FlaskConical,
   Plus,
@@ -269,10 +270,13 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <Button variant="ghost" size="sm" onClick={handleSignOut}>
-            <LogOut className="h-4 w-4 mr-2" />
-            Çıkış Yap
-          </Button>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Button variant="ghost" size="sm" onClick={handleSignOut}>
+              <LogOut className="h-4 w-4 mr-2" />
+              Çıkış Yap
+            </Button>
+          </div>
         </div>
       </header>
 
