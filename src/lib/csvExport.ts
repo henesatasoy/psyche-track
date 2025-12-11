@@ -161,7 +161,7 @@ export function generateCSV(
   });
 
   if (rows.length === 0) {
-    return "No data available";
+    return "Veri bulunamadı";
   }
 
   // Get all unique columns
