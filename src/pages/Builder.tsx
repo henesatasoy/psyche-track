@@ -196,8 +196,8 @@ export default function Builder() {
           type: "iat",
           timeLimit: 3000,
           feedbackType: "correction",
-          leftCategory: { id: crypto.randomUUID(), label: "Category A", stimuli: [] },
-          rightCategory: { id: crypto.randomUUID(), label: "Category B", stimuli: [] },
+          leftCategory: { id: crypto.randomUUID(), label: "Kategori A", stimuli: [] },
+          rightCategory: { id: crypto.randomUUID(), label: "Kategori B", stimuli: [] },
         } as IATBlock;
         break;
       default:
