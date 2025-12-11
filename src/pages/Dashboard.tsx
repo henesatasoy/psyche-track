@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { generateCSV, downloadCSV } from "@/lib/csvExport";
 import {
   FlaskConical,
   Plus,
@@ -18,6 +19,7 @@ import {
   ExternalLink,
   Copy,
   Loader2,
+  Download,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -33,12 +35,21 @@ interface Experiment {
   status: "draft" | "active" | "closed";
   created_at: string;
   updated_at: string;
+  result_count?: number;
+}
+
+interface BlockResult {
+  blockId: string;
+  blockType: string;
+  data: Record<string, unknown>;
+  completedAt: number;
 }
 
 export default function Dashboard() {
   const { user, username, signOut, loading: authLoading, isAuthenticated } = useAuth();
   const [experiments, setExperiments] = useState<Experiment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [exportingId, setExportingId] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -49,7 +60,7 @@ export default function Dashboard() {
     }
   }, [authLoading, isAuthenticated, navigate]);
 
-  // Fetch experiments
+  // Fetch experiments with result counts
   useEffect(() => {
     if (user) {
       fetchExperiments();
@@ -58,13 +69,34 @@ export default function Dashboard() {
 
   const fetchExperiments = async () => {
     try {
-      const { data, error } = await supabase
+      // Fetch experiments
+      const { data: experimentsData, error: experimentsError } = await supabase
         .from("experiments")
         .select("*")
         .order("updated_at", { ascending: false });
 
-      if (error) throw error;
-      setExperiments((data || []) as Experiment[]);
+      if (experimentsError) throw experimentsError;
+
+      // Fetch result counts for each experiment
+      const experimentsWithCounts = await Promise.all(
+        (experimentsData || []).map(async (exp) => {
+          const { count, error: countError } = await supabase
+            .from("results")
+            .select("*", { count: "exact", head: true })
+            .eq("experiment_id", exp.id);
+
+          return {
+            id: exp.id,
+            title: exp.title,
+            status: exp.status as "draft" | "active" | "closed",
+            created_at: exp.created_at,
+            updated_at: exp.updated_at,
+            result_count: countError ? 0 : (count || 0),
+          };
+        })
+      );
+
+      setExperiments(experimentsWithCounts);
     } catch (error) {
       console.error("Error fetching experiments:", error);
       toast({
@@ -103,7 +135,6 @@ export default function Dashboard() {
         description: "Start building your experiment.",
       });
 
-      // Navigate to builder (will implement in Phase 2)
       navigate(`/builder/${data.id}`);
     } catch (error) {
       console.error("Error creating experiment:", error);
@@ -136,6 +167,54 @@ export default function Dashboard() {
         title: "Error",
         description: "Failed to delete experiment.",
       });
+    }
+  };
+
+  const handleExportResults = async (experiment: Experiment) => {
+    setExportingId(experiment.id);
+
+    try {
+      const { data: results, error } = await supabase
+        .from("results")
+        .select("*")
+        .eq("experiment_id", experiment.id)
+        .order("completed_at", { ascending: true });
+
+      if (error) throw error;
+
+      if (!results || results.length === 0) {
+        toast({
+          title: "No results",
+          description: "This experiment has no results to export.",
+        });
+        return;
+      }
+
+      // Transform results for CSV generation
+      const formattedResults = results.map((r) => ({
+        id: r.id,
+        data_json: r.data_json as unknown as BlockResult[],
+        completed_at: r.completed_at,
+      }));
+
+      const csv = generateCSV(experiment.id, experiment.title, formattedResults);
+      const filename = `${experiment.title.replace(/[^a-z0-9]/gi, "_")}_results_${new Date().toISOString().split("T")[0]}.csv`;
+      
+      downloadCSV(csv, filename);
+
+      toast({
+        title: "Export complete",
+        description: `Downloaded ${results.length} result${results.length !== 1 ? "s" : ""}.`,
+      });
+    } catch (error) {
+      console.error("Error exporting results:", error);
+      toast({
+        variant: "destructive",
+        title: "Export failed",
+        description: "Could not export results. Please try again.",
+      });
+    } finally {
+      setExportingId(null);
     }
   };
 
@@ -259,7 +338,7 @@ export default function Dashboard() {
                           <MoreVertical className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
+                      <DropdownMenuContent align="end" className="bg-popover">
                         <DropdownMenuItem
                           onClick={(e) => {
                             e.stopPropagation();
@@ -278,6 +357,20 @@ export default function Dashboard() {
                           <Copy className="h-4 w-4 mr-2" />
                           Copy Link
                         </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleExportResults(experiment);
+                          }}
+                          disabled={exportingId === experiment.id || (experiment.result_count || 0) === 0}
+                        >
+                          {exportingId === experiment.id ? (
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          ) : (
+                            <Download className="h-4 w-4 mr-2" />
+                          )}
+                          Download Results
+                        </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           className="text-destructive focus:text-destructive"
@@ -295,10 +388,18 @@ export default function Dashboard() {
                 </CardHeader>
 
                 <CardContent className="pt-0">
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className={getStatusColor(experiment.status)}>
-                      {experiment.status}
-                    </Badge>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className={getStatusColor(experiment.status)}>
+                        {experiment.status}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center gap-1 text-muted-foreground">
+                      <Users className="h-3.5 w-3.5" />
+                      <span className="text-xs font-medium">
+                        {experiment.result_count || 0} response{(experiment.result_count || 0) !== 1 ? "s" : ""}
+                      </span>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
