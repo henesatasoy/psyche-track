@@ -101,8 +101,8 @@ export default function Dashboard() {
       console.error("Error fetching experiments:", error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to load experiments.",
+        title: "Hata",
+        description: "Deneyler yüklenemedi.",
       });
     } finally {
       setLoading(false);
@@ -121,7 +121,7 @@ export default function Dashboard() {
       const { data, error } = await supabase
         .from("experiments")
         .insert({
-          title: "Untitled Experiment",
+          title: "İsimsiz Deney",
           owner_id: user.id,
           config: [],
         })
@@ -131,8 +131,8 @@ export default function Dashboard() {
       if (error) throw error;
 
       toast({
-        title: "Experiment created",
-        description: "Start building your experiment.",
+        title: "Deney oluşturuldu",
+        description: "Deneyinizi tasarlamaya başlayın.",
       });
 
       navigate(`/builder/${data.id}`);
@@ -140,8 +140,8 @@ export default function Dashboard() {
       console.error("Error creating experiment:", error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to create experiment.",
+        title: "Hata",
+        description: "Deney oluşturulamadı.",
       });
     }
   };
@@ -157,15 +157,15 @@ export default function Dashboard() {
 
       setExperiments((prev) => prev.filter((e) => e.id !== id));
       toast({
-        title: "Experiment deleted",
-        description: "The experiment has been removed.",
+        title: "Deney silindi",
+        description: "Deney başarıyla kaldırıldı.",
       });
     } catch (error) {
       console.error("Error deleting experiment:", error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to delete experiment.",
+        title: "Hata",
+        description: "Deney silinemedi.",
       });
     }
   };
@@ -184,8 +184,8 @@ export default function Dashboard() {
 
       if (!results || results.length === 0) {
         toast({
-          title: "No results",
-          description: "This experiment has no results to export.",
+          title: "Sonuç yok",
+          description: "Bu deneyde dışa aktarılacak sonuç bulunmuyor.",
         });
         return;
       }
@@ -203,15 +203,15 @@ export default function Dashboard() {
       downloadCSV(csv, filename);
 
       toast({
-        title: "Export complete",
-        description: `Downloaded ${results.length} result${results.length !== 1 ? "s" : ""}.`,
+        title: "Dışa aktarım tamamlandı",
+        description: `${results.length} sonuç indirildi.`,
       });
     } catch (error) {
       console.error("Error exporting results:", error);
       toast({
         variant: "destructive",
-        title: "Export failed",
-        description: "Could not export results. Please try again.",
+        title: "Dışa aktarım başarısız",
+        description: "Sonuçlar dışa aktarılamadı. Lütfen tekrar deneyin.",
       });
     } finally {
       setExportingId(null);
@@ -222,8 +222,8 @@ export default function Dashboard() {
     const url = `${window.location.origin}/run/${id}`;
     navigator.clipboard.writeText(url);
     toast({
-      title: "Link copied",
-      description: "Participant link copied to clipboard.",
+      title: "Link kopyalandı",
+      description: "Katılımcı linki panoya kopyalandı.",
     });
   };
 
@@ -239,9 +239,9 @@ export default function Dashboard() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      month: "short",
+    return new Date(dateString).toLocaleDateString("tr-TR", {
       day: "numeric",
+      month: "long",
       year: "numeric",
     });
   };
@@ -264,14 +264,14 @@ export default function Dashboard() {
               <FlaskConical className="h-5 w-5" />
             </div>
             <div>
-              <h1 className="text-lg font-semibold text-foreground">Research Platform</h1>
-              <p className="text-xs text-muted-foreground">Logged in as {username}</p>
+              <h1 className="text-lg font-semibold text-foreground">Araştırma Platformu</h1>
+              <p className="text-xs text-muted-foreground">{username} olarak giriş yapıldı</p>
             </div>
           </div>
 
           <Button variant="ghost" size="sm" onClick={handleSignOut}>
             <LogOut className="h-4 w-4 mr-2" />
-            Sign Out
+            Çıkış Yap
           </Button>
         </div>
       </header>
@@ -280,15 +280,15 @@ export default function Dashboard() {
       <main className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h2 className="text-2xl font-semibold text-foreground">My Experiments</h2>
+            <h2 className="text-2xl font-semibold text-foreground">Deneylerim</h2>
             <p className="text-muted-foreground mt-1">
-              Create and manage your behavioral research experiments
+              Davranışsal araştırma deneylerini oluşturun ve yönetin
             </p>
           </div>
 
           <Button onClick={handleCreateExperiment}>
             <Plus className="h-4 w-4 mr-2" />
-            New Experiment
+            Yeni Deney
           </Button>
         </div>
 
@@ -346,7 +346,7 @@ export default function Dashboard() {
                           }}
                         >
                           <ExternalLink className="h-4 w-4 mr-2" />
-                          Preview
+                          Önizleme
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={(e) => {
@@ -355,7 +355,7 @@ export default function Dashboard() {
                           }}
                         >
                           <Copy className="h-4 w-4 mr-2" />
-                          Copy Link
+                          Linki Kopyala
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={(e) => {
@@ -369,7 +369,7 @@ export default function Dashboard() {
                           ) : (
                             <Download className="h-4 w-4 mr-2" />
                           )}
-                          Download Results
+                          Sonuçları İndir
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
@@ -380,7 +380,7 @@ export default function Dashboard() {
                           }}
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
-                          Delete
+                          Sil
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -391,13 +391,13 @@ export default function Dashboard() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Badge variant="outline" className={getStatusColor(experiment.status)}>
-                        {experiment.status}
+                        {experiment.status === "draft" ? "Taslak" : experiment.status === "active" ? "Aktif" : "Kapalı"}
                       </Badge>
                     </div>
                     <div className="flex items-center gap-1 text-muted-foreground">
                       <Users className="h-3.5 w-3.5" />
                       <span className="text-xs font-medium">
-                        {experiment.result_count || 0} response{(experiment.result_count || 0) !== 1 ? "s" : ""}
+                        {experiment.result_count || 0} yanıt
                       </span>
                     </div>
                   </div>
