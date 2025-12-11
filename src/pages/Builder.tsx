@@ -40,6 +40,7 @@ import {
 import { SortableBlock } from "@/components/builder/SortableBlock";
 import { BlockEditor } from "@/components/builder/BlockEditor";
 import { AddBlockMenu } from "@/components/builder/AddBlockMenu";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import {
   ExperimentBlock,
   BlockType,
@@ -311,6 +312,7 @@ export default function Builder() {
           </div>
 
           <div className="flex items-center gap-2">
+            <ThemeToggle />
             <Button variant="outline" size="sm" onClick={copyRunLink}>
               <Copy className="h-4 w-4 mr-2" />
               Linki Kopyala
