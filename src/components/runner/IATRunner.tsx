@@ -106,7 +106,7 @@ export function IATRunner({ block, onComplete, progress }: IATRunnerProps) {
 
   const startTask = () => {
     if (trials.length === 0) {
-      onComplete({ trials: [], message: "No stimuli configured" });
+      onComplete({ trials: [], message: "Uyaran yapılandırılmamış" });
       return;
     }
     showNextStimulus();
@@ -257,7 +257,7 @@ export function IATRunner({ block, onComplete, progress }: IATRunnerProps) {
         <div className="flex-1 flex items-center justify-center p-6">
           <div className="max-w-lg text-center animate-fade-in">
             <h2 className="text-2xl font-semibold text-foreground mb-6">
-              Categorization Task
+              Sınıflandırma Görevi
             </h2>
 
             <div className="bg-card border border-border rounded-lg p-6 mb-8">
@@ -281,18 +281,18 @@ export function IATRunner({ block, onComplete, progress }: IATRunnerProps) {
               </div>
 
               <p className="text-sm text-muted-foreground">
-                Press <kbd className="px-1.5 py-0.5 bg-muted border rounded text-xs font-mono">E</kbd> for items belonging to <strong>{block.leftCategory.label}</strong>
+                <strong>{block.leftCategory.label}</strong> kategorisine ait öğeler için <kbd className="px-1.5 py-0.5 bg-muted border rounded text-xs font-mono">E</kbd> tuşuna basın
                 <br />
-                Press <kbd className="px-1.5 py-0.5 bg-muted border rounded text-xs font-mono">I</kbd> for items belonging to <strong>{block.rightCategory.label}</strong>
+                <strong>{block.rightCategory.label}</strong> kategorisine ait öğeler için <kbd className="px-1.5 py-0.5 bg-muted border rounded text-xs font-mono">I</kbd> tuşuna basın
               </p>
             </div>
 
             <p className="text-muted-foreground mb-4">
-              Respond as quickly and accurately as possible.
+              Mümkün olduğunca hızlı ve doğru yanıt verin.
             </p>
 
             <p className="text-sm text-primary font-medium">
-              Press SPACE or ENTER to begin
+              Başlamak için BOŞLUK veya ENTER tuşuna basın
             </p>
           </div>
         </div>

@@ -47,13 +47,13 @@ export default function Runner() {
       if (error) throw error;
 
       if (!data) {
-        setError("Experiment not found");
+        setError("Deney bulunamadı");
         setState("error");
         return;
       }
 
       if (data.status === "closed") {
-        setError("This experiment is no longer accepting responses");
+        setError("Bu deney artık yanıt kabul etmiyor");
         setState("error");
         return;
       }
@@ -69,7 +69,7 @@ export default function Runner() {
       };
 
       if (experimentData.config.length === 0) {
-        setError("This experiment has no content");
+        setError("Bu deneyde içerik bulunmuyor");
         setState("error");
         return;
       }
@@ -78,7 +78,7 @@ export default function Runner() {
       setState("preloading");
     } catch (err) {
       console.error("Error fetching experiment:", err);
-      setError("Failed to load experiment");
+      setError("Deney yüklenemedi");
       setState("error");
     }
   };
@@ -168,8 +168,8 @@ export default function Runner() {
       console.error("Error submitting results:", err);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to submit your responses. Please try again.",
+        title: "Hata",
+        description: "Yanıtlarınız gönderilemedi. Lütfen tekrar deneyin.",
       });
     }
   };
@@ -216,7 +216,7 @@ export default function Runner() {
       <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
         <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
         <p className="text-muted-foreground text-sm">
-          {state === "loading" ? "Loading experiment..." : "Preparing stimuli..."}
+          {state === "loading" ? "Deney yükleniyor..." : "Uyaranlar hazırlanıyor..."}
         </p>
       </div>
     );
@@ -228,7 +228,7 @@ export default function Runner() {
       <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
         <div className="text-center max-w-md">
           <h1 className="text-xl font-semibold text-foreground mb-2">
-            Unable to Load Experiment
+            Deney Yüklenemedi
           </h1>
           <p className="text-muted-foreground mb-6">{error}</p>
         </div>

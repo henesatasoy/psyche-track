@@ -36,7 +36,7 @@ export function InstructionRunner({ block, onComplete, progress }: InstructionRu
 
           <div className="mt-8 flex justify-center">
             <Button size="lg" onClick={handleContinue}>
-              Continue
+              Devam Et
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
