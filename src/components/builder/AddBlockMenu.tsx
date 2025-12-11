@@ -15,20 +15,20 @@ interface AddBlockMenuProps {
 const blockOptions = [
   {
     type: "instruction" as BlockType,
-    label: "Instruction",
-    description: "Text guidelines for participants",
+    label: "Yönerge",
+    description: "Katılımcılar için metin yönergeleri",
     icon: FileText,
   },
   {
     type: "survey" as BlockType,
-    label: "Survey",
-    description: "Open-ended or multiple choice questions",
+    label: "Anket",
+    description: "Açık uçlu veya çoktan seçmeli sorular",
     icon: ClipboardList,
   },
   {
     type: "iat" as BlockType,
-    label: "IAT Block",
-    description: "Implicit Association Test task",
+    label: "IAT Bloğu",
+    description: "Örtük Çağrışım Testi görevi",
     icon: Brain,
   },
 ];
@@ -39,7 +39,7 @@ export function AddBlockMenu({ onAdd }: AddBlockMenuProps) {
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm" className="w-full">
           <Plus className="h-4 w-4 mr-2" />
-          Add Block
+          Blok Ekle
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-64 bg-popover">

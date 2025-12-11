@@ -12,11 +12,11 @@ export function BlockEditor({ block, onChange }: BlockEditorProps) {
   if (!block) {
     return (
       <div className="h-full flex items-center justify-center text-muted-foreground">
-        <div className="text-center">
-          <p className="text-sm">Select a block to edit its content</p>
-          <p className="text-xs mt-1">or add a new block from the sidebar</p>
-        </div>
+      <div className="text-center">
+        <p className="text-sm">Düzenlemek için bir blok seçin</p>
+        <p className="text-xs mt-1">veya kenar çubuğundan yeni bir blok ekleyin</p>
       </div>
+    </div>
     );
   }
 

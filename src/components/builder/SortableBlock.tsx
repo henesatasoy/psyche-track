@@ -20,9 +20,9 @@ const blockIcons = {
 };
 
 const blockLabels = {
-  instruction: "Instruction",
-  survey: "Survey",
-  iat: "IAT Block",
+  instruction: "Yönerge",
+  survey: "Anket",
+  iat: "IAT Bloğu",
 };
 
 export function SortableBlock({ block, isSelected, onSelect, onDelete }: SortableBlockProps) {
@@ -45,9 +45,9 @@ export function SortableBlock({ block, isSelected, onSelect, onDelete }: Sortabl
   const getBlockPreview = () => {
     switch (block.type) {
       case "instruction":
-        return block.content ? block.content.slice(0, 80) + (block.content.length > 80 ? "..." : "") : "No content yet";
+        return block.content ? block.content.slice(0, 80) + (block.content.length > 80 ? "..." : "") : "Henüz içerik yok";
       case "survey":
-        return `${block.questions.length} question${block.questions.length !== 1 ? "s" : ""}`;
+        return `${block.questions.length} soru`;
       case "iat":
         return `${block.leftCategory.label} vs ${block.rightCategory.label}`;
       default:
