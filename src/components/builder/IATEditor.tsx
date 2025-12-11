@@ -101,15 +101,15 @@ export function IATEditor({ block, onChange }: IATEditorProps) {
       });
 
       toast({
-        title: "Image uploaded",
-        description: "Stimulus image added successfully.",
+        title: "Görsel yüklendi",
+        description: "Uyaran görseli başarıyla eklendi.",
       });
     } catch (error) {
       console.error("Error uploading image:", error);
       toast({
         variant: "destructive",
-        title: "Upload failed",
-        description: "Could not upload the image. Please try again.",
+        title: "Yükleme başarısız",
+        description: "Görsel yüklenemedi. Lütfen tekrar deneyin.",
       });
     } finally {
       setUploading(false);
@@ -163,14 +163,14 @@ export function IATEditor({ block, onChange }: IATEditorProps) {
             <span className="inline-flex items-center justify-center w-6 h-6 rounded bg-primary text-primary-foreground text-xs font-bold">
               {keyLabel}
             </span>
-            {side === "left" ? "Left Category" : "Right Category"}
+            {side === "left" ? "Sol Kategori" : "Sağ Kategori"}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label>Category Label</Label>
+            <Label>Kategori Etiketi</Label>
             <Input
-              placeholder="e.g., Pleasant, Good, Flowers"
+              placeholder="örn., Hoş, İyi, Çiçekler"
               value={category.label}
               onChange={(e) => updateCategory(side, { label: e.target.value })}
             />
@@ -178,7 +178,7 @@ export function IATEditor({ block, onChange }: IATEditorProps) {
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label>Stimuli ({category.stimuli.length})</Label>
+              <Label>Uyaranlar ({category.stimuli.length})</Label>
               <div className="flex gap-1">
                 <Button
                   type="button"
@@ -187,7 +187,7 @@ export function IATEditor({ block, onChange }: IATEditorProps) {
                   onClick={() => addTextStimulus(side)}
                 >
                   <Type className="h-4 w-4 mr-1" />
-                  Text
+                  Metin
                 </Button>
                 <Button
                   type="button"
@@ -201,7 +201,7 @@ export function IATEditor({ block, onChange }: IATEditorProps) {
                   ) : (
                     <Image className="h-4 w-4 mr-1" />
                   )}
-                  Image
+                  Görsel
                 </Button>
                 <input
                   ref={fileInputRef}
@@ -221,7 +221,7 @@ export function IATEditor({ block, onChange }: IATEditorProps) {
 
             {category.stimuli.length === 0 ? (
               <div className="text-center py-6 border border-dashed rounded-md text-muted-foreground text-sm">
-                No stimuli added yet
+                Henüz uyaran eklenmedi
               </div>
             ) : (
               <div className="space-y-2">
@@ -238,7 +238,7 @@ export function IATEditor({ block, onChange }: IATEditorProps) {
                           className="w-10 h-10 object-cover rounded"
                         />
                         <span className="text-sm text-muted-foreground truncate flex-1">
-                          Image stimulus
+                          Görsel uyaran
                         </span>
                       </div>
                     ) : (
@@ -247,7 +247,7 @@ export function IATEditor({ block, onChange }: IATEditorProps) {
                         onChange={(e) =>
                           updateStimulus(side, stimulus.id, e.target.value)
                         }
-                        placeholder="Enter text stimulus..."
+                        placeholder="Metin uyaranı girin..."
                         className="flex-1"
                       />
                     )}
@@ -274,17 +274,17 @@ export function IATEditor({ block, onChange }: IATEditorProps) {
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-medium text-foreground mb-1">
-          IAT Block Configuration
+          IAT Bloğu Yapılandırması
         </h3>
         <p className="text-sm text-muted-foreground">
-          Configure your Implicit Association Test with categories, stimuli, and timing.
+          Örtük Çağrışım Testinizi kategoriler, uyaranlar ve zamanlama ile yapılandırın.
         </p>
       </div>
 
       {/* Settings Row */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="time-limit">Time Limit (ms)</Label>
+          <Label htmlFor="time-limit">Zaman Sınırı (ms)</Label>
           <Input
             id="time-limit"
             type="number"
@@ -297,12 +297,12 @@ export function IATEditor({ block, onChange }: IATEditorProps) {
             }
           />
           <p className="text-xs text-muted-foreground">
-            Maximum response time before timeout (500-10000ms)
+            Zaman aşımından önce maksimum yanıt süresi (500-10000ms)
           </p>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="feedback-type">Feedback Type</Label>
+          <Label htmlFor="feedback-type">Geri Bildirim Türü</Label>
           <Select
             value={block.feedbackType}
             onValueChange={(value: "correction" | "flash" | "none") =>
@@ -314,18 +314,18 @@ export function IATEditor({ block, onChange }: IATEditorProps) {
             </SelectTrigger>
             <SelectContent className="bg-popover">
               <SelectItem value="correction">
-                Correction (Block until correct)
+                Düzeltme (Doğru olana kadar bekle)
               </SelectItem>
               <SelectItem value="flash">
-                Flash (Brief error indicator)
+                Flaş (Kısa hata göstergesi)
               </SelectItem>
               <SelectItem value="none">
-                None (No feedback)
+                Yok (Geri bildirim yok)
               </SelectItem>
             </SelectContent>
           </Select>
           <p className="text-xs text-muted-foreground">
-            How to handle incorrect responses
+            Yanlış yanıtlar nasıl işlensin
           </p>
         </div>
       </div>
@@ -337,13 +337,13 @@ export function IATEditor({ block, onChange }: IATEditorProps) {
             <span className="inline-flex items-center justify-center w-5 h-5 rounded bg-primary/10 text-primary text-xs font-bold">
               E
             </span>
-            {block.leftCategory.label || "Left Category"}
+            {block.leftCategory.label || "Sol Kategori"}
           </TabsTrigger>
           <TabsTrigger value="right" className="gap-2">
             <span className="inline-flex items-center justify-center w-5 h-5 rounded bg-primary/10 text-primary text-xs font-bold">
               I
             </span>
-            {block.rightCategory.label || "Right Category"}
+            {block.rightCategory.label || "Sağ Kategori"}
           </TabsTrigger>
         </TabsList>
         <TabsContent value="left" className="mt-4">
@@ -368,15 +368,15 @@ export function IATEditor({ block, onChange }: IATEditorProps) {
       <Card className="bg-muted/30">
         <CardContent className="py-4">
           <p className="text-sm text-muted-foreground text-center">
-            Participants will press{" "}
+            Katılımcılar{" "}
             <kbd className="px-1.5 py-0.5 bg-background border rounded text-xs font-mono">
               E
             </kbd>{" "}
-            for <strong>{block.leftCategory.label || "Left"}</strong> and{" "}
+            tuşuna <strong>{block.leftCategory.label || "Sol"}</strong> için ve{" "}
             <kbd className="px-1.5 py-0.5 bg-background border rounded text-xs font-mono">
               I
             </kbd>{" "}
-            for <strong>{block.rightCategory.label || "Right"}</strong>
+            tuşuna <strong>{block.rightCategory.label || "Sağ"}</strong> için basacaklar
           </p>
         </CardContent>
       </Card>

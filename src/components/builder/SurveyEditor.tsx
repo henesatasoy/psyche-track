@@ -72,17 +72,17 @@ export function SurveyEditor({ block, onChange }: SurveyEditorProps) {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-medium text-foreground mb-1">Survey Block</h3>
+        <h3 className="text-lg font-medium text-foreground mb-1">Anket Bloğu</h3>
         <p className="text-sm text-muted-foreground">
-          Add questions to collect participant responses.
+          Katılımcı yanıtlarını toplamak için sorular ekleyin.
         </p>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="survey-title">Section Title</Label>
+        <Label htmlFor="survey-title">Bölüm Başlığı</Label>
         <Input
           id="survey-title"
-          placeholder="e.g., Demographics, Post-Task Questions"
+          placeholder="örn., Demografik Bilgiler, Görev Sonrası Sorular"
           value={block.title}
           onChange={(e) => onChange({ ...block, title: e.target.value })}
         />
@@ -90,7 +90,7 @@ export function SurveyEditor({ block, onChange }: SurveyEditorProps) {
 
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <Label>Questions ({block.questions.length})</Label>
+          <Label>Sorular ({block.questions.length})</Label>
           <div className="flex gap-2">
             <Button
               type="button"
@@ -99,7 +99,7 @@ export function SurveyEditor({ block, onChange }: SurveyEditorProps) {
               onClick={() => addQuestion("open")}
             >
               <MessageSquare className="h-4 w-4 mr-1" />
-              Open-Ended
+              Açık Uçlu
             </Button>
             <Button
               type="button"
@@ -108,7 +108,7 @@ export function SurveyEditor({ block, onChange }: SurveyEditorProps) {
               onClick={() => addQuestion("multiple_choice")}
             >
               <ListChecks className="h-4 w-4 mr-1" />
-              Multiple Choice
+              Çoktan Seçmeli
             </Button>
           </div>
         </div>
@@ -116,7 +116,7 @@ export function SurveyEditor({ block, onChange }: SurveyEditorProps) {
         {block.questions.length === 0 ? (
           <Card className="border-dashed">
             <CardContent className="py-8 text-center text-muted-foreground">
-              <p className="text-sm">No questions yet. Add your first question above.</p>
+              <p className="text-sm">Henüz soru yok. Yukarıdan ilk sorunuzu ekleyin.</p>
             </CardContent>
           </Card>
         ) : (
@@ -137,12 +137,12 @@ export function SurveyEditor({ block, onChange }: SurveyEditorProps) {
                             ? "bg-primary/10 text-primary"
                             : "bg-accent text-accent-foreground"
                         )}>
-                          {question.type === "open" ? "Open-ended" : "Multiple choice"}
+                          {question.type === "open" ? "Açık uçlu" : "Çoktan seçmeli"}
                         </span>
                       </div>
 
                       <Input
-                        placeholder="Enter your question..."
+                        placeholder="Sorunuzu girin..."
                         value={question.question}
                         onChange={(e) => updateQuestion(index, { question: e.target.value })}
                       />
@@ -153,7 +153,7 @@ export function SurveyEditor({ block, onChange }: SurveyEditorProps) {
                             <div key={optionIndex} className="flex items-center gap-2">
                               <div className="w-4 h-4 rounded-full border-2 border-muted-foreground/30 flex-shrink-0" />
                               <Input
-                                placeholder={`Option ${optionIndex + 1}`}
+                                placeholder={`Seçenek ${optionIndex + 1}`}
                                 value={option}
                                 onChange={(e) => updateOption(index, optionIndex, e.target.value)}
                                 className="flex-1"
@@ -179,7 +179,7 @@ export function SurveyEditor({ block, onChange }: SurveyEditorProps) {
                             onClick={() => addOption(index)}
                           >
                             <Plus className="h-4 w-4 mr-1" />
-                            Add Option
+                            Seçenek Ekle
                           </Button>
                         </div>
                       )}
@@ -192,7 +192,7 @@ export function SurveyEditor({ block, onChange }: SurveyEditorProps) {
                             onCheckedChange={(checked) => updateQuestion(index, { required: checked })}
                           />
                           <Label htmlFor={`required-${question.id}`} className="text-sm font-normal">
-                            Required
+                            Zorunlu
                           </Label>
                         </div>
 
@@ -204,7 +204,7 @@ export function SurveyEditor({ block, onChange }: SurveyEditorProps) {
                           onClick={() => deleteQuestion(index)}
                         >
                           <Trash2 className="h-4 w-4 mr-1" />
-                          Remove
+                          Kaldır
                         </Button>
                       </div>
                     </div>

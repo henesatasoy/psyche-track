@@ -113,8 +113,8 @@ export default function Builder() {
       console.error("Error fetching experiment:", error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to load experiment.",
+        title: "Hata",
+        description: "Deney yüklenemedi.",
       });
       navigate("/dashboard");
     } finally {
@@ -139,15 +139,15 @@ export default function Builder() {
       if (error) throw error;
 
       toast({
-        title: "Saved",
-        description: "Experiment saved successfully.",
+        title: "Kaydedildi",
+        description: "Deney başarıyla kaydedildi.",
       });
     } catch (error) {
       console.error("Error saving experiment:", error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Failed to save experiment.",
+        title: "Hata",
+        description: "Deney kaydedilemedi.",
       });
     } finally {
       setSaving(false);
@@ -240,8 +240,8 @@ export default function Builder() {
     const url = `${window.location.origin}/run/${id}`;
     navigator.clipboard.writeText(url);
     toast({
-      title: "Link copied",
-      description: "Participant link copied to clipboard.",
+      title: "Link kopyalandı",
+      description: "Katılımcı linki panoya kopyalandı.",
     });
   };
 
@@ -290,7 +290,7 @@ export default function Builder() {
                 setExperiment({ ...experiment, title: e.target.value })
               }
               className="max-w-xs font-medium border-transparent hover:border-input focus:border-input"
-              placeholder="Experiment title"
+              placeholder="Deney başlığı"
             />
 
             <Select
@@ -303,9 +303,9 @@ export default function Builder() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-popover">
-                <SelectItem value="draft">Draft</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="closed">Closed</SelectItem>
+                <SelectItem value="draft">Taslak</SelectItem>
+                <SelectItem value="active">Aktif</SelectItem>
+                <SelectItem value="closed">Kapalı</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -313,7 +313,7 @@ export default function Builder() {
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={copyRunLink}>
               <Copy className="h-4 w-4 mr-2" />
-              Copy Link
+              Linki Kopyala
             </Button>
             <Button
               variant="outline"
@@ -321,7 +321,7 @@ export default function Builder() {
               onClick={() => window.open(`/run/${id}`, "_blank")}
             >
               <Play className="h-4 w-4 mr-2" />
-              Preview
+              Önizleme
             </Button>
             <Button size="sm" onClick={saveExperiment} disabled={saving}>
               {saving ? (
@@ -329,7 +329,7 @@ export default function Builder() {
               ) : (
                 <Save className="h-4 w-4 mr-2" />
               )}
-              Save
+              Kaydet
             </Button>
           </div>
         </div>
@@ -340,7 +340,7 @@ export default function Builder() {
         {/* Sidebar - Block List */}
         <aside className="w-72 border-r border-border bg-card p-4 flex flex-col overflow-hidden">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-medium text-foreground">Blocks</h2>
+            <h2 className="font-medium text-foreground">Bloklar</h2>
             <Badge variant="secondary" className="text-xs">
               {experiment.config.length}
             </Badge>
@@ -354,7 +354,7 @@ export default function Builder() {
                 <CardContent className="py-8 text-center">
                   <FileText className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
                   <p className="text-sm text-muted-foreground">
-                    No blocks yet. Add your first block above.
+                    Henüz blok yok. Yukarıdan ilk bloğunuzu ekleyin.
                   </p>
                 </CardContent>
               </Card>
