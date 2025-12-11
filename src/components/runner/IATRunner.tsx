@@ -11,7 +11,7 @@ interface IATRunnerProps {
 
 interface Trial {
   stimulus: IATStimulus;
-  correctSide: "left" | "right";
+  correctSide: "left" | "right" | "none";
   categoryLabel: string;
 }
 
@@ -19,11 +19,12 @@ interface TrialResult {
   stimulusId: string;
   stimulusValue: string;
   stimulusType: "text" | "image";
-  correctSide: "left" | "right";
+  correctSide: "left" | "right" | "none";
   responseSide: "left" | "right" | null;
   reactionTime: number;
   correct: boolean;
   timedOut: boolean;
+  noCorrectAnswer: boolean;
 }
 
 type IATState = "ready" | "fixation" | "stimulus" | "feedback" | "complete";
@@ -57,7 +58,7 @@ export function IATRunner({ block, onComplete, progress }: IATRunnerProps) {
     block.leftCategory.stimuli.forEach((stimulus) => {
       allTrials.push({
         stimulus,
-        correctSide: "left",
+        correctSide: stimulus.correctResponse || "left",
         categoryLabel: block.leftCategory.label,
       });
     });
@@ -65,7 +66,7 @@ export function IATRunner({ block, onComplete, progress }: IATRunnerProps) {
     block.rightCategory.stimuli.forEach((stimulus) => {
       allTrials.push({
         stimulus,
-        correctSide: "right",
+        correctSide: stimulus.correctResponse || "right",
         categoryLabel: block.rightCategory.label,
       });
     });
@@ -141,7 +142,10 @@ export function IATRunner({ block, onComplete, progress }: IATRunnerProps) {
 
       const reactionTime = performance.now() - stimulusStartTime.current;
       const trial = trials[currentTrialIndex];
-      const correct = responseSide === trial.correctSide;
+      
+      // If no correct answer, any response is considered correct
+      const noCorrectAnswer = trial.correctSide === "none";
+      const correct = noCorrectAnswer || responseSide === trial.correctSide;
 
       const result: TrialResult = {
         stimulusId: trial.stimulus.id,
@@ -152,6 +156,7 @@ export function IATRunner({ block, onComplete, progress }: IATRunnerProps) {
         reactionTime: Math.round(reactionTime * 100) / 100,
         correct,
         timedOut: false,
+        noCorrectAnswer,
       };
 
       if (!correct && block.feedbackType !== "none") {
@@ -198,6 +203,7 @@ export function IATRunner({ block, onComplete, progress }: IATRunnerProps) {
     if (state !== "stimulus" || currentTrialIndex >= trials.length) return;
 
     const trial = trials[currentTrialIndex];
+    const noCorrectAnswer = trial.correctSide === "none";
     const result: TrialResult = {
       stimulusId: trial.stimulus.id,
       stimulusValue: trial.stimulus.value,
@@ -207,6 +213,7 @@ export function IATRunner({ block, onComplete, progress }: IATRunnerProps) {
       reactionTime: block.timeLimit,
       correct: false,
       timedOut: true,
+      noCorrectAnswer,
     };
 
     recordResultAndAdvance(result);

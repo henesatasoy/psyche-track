@@ -28,6 +28,7 @@ export interface IATStimulus {
   id: string;
   type: "text" | "image";
   value: string; // Text content or image URL
+  correctResponse?: "left" | "right" | "none"; // Which key is correct, or none if no correct answer
 }
 
 export interface IATCategory {
