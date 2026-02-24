@@ -58,6 +58,11 @@ export default function Runner() {
         return;
       }
 
+      if (data.status === "draft") {
+        // Draft experiments: only accessible to the owner (RLS enforces this)
+        // Allow preview for the owner
+      }
+
       const experimentData: Experiment = {
         id: data.id,
         title: data.title,
