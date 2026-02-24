@@ -320,10 +320,12 @@ export default function Builder() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => window.open(`/run/${id}`, "_blank")}
+              asChild
             >
-              <Play className="h-4 w-4 mr-2" />
-              Önizleme
+              <a href={`/run/${id}`} target="_blank" rel="noopener noreferrer">
+                <Play className="h-4 w-4 mr-2" />
+                Önizleme
+              </a>
             </Button>
             <Button size="sm" onClick={saveExperiment} disabled={saving}>
               {saving ? (
