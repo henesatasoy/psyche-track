@@ -320,12 +320,11 @@ export default function Builder() {
             <Button
               variant="outline"
               size="sm"
-              asChild
+              onClick={() => id && navigate(`/run/${id}`)}
+              disabled={!id}
             >
-              <a href={`/run/${id}`} target="_blank" rel="noopener noreferrer">
-                <Play className="h-4 w-4 mr-2" />
-                Önizleme
-              </a>
+              <Play className="h-4 w-4 mr-2" />
+              Önizleme
             </Button>
             <Button size="sm" onClick={saveExperiment} disabled={saving}>
               {saving ? (
