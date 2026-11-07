@@ -302,13 +302,13 @@ export default function Dashboard() {
               <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-muted mb-4">
                 <FileText className="h-6 w-6 text-muted-foreground" />
               </div>
-              <h3 className="text-lg font-medium text-foreground mb-2">No experiments yet</h3>
+              <h3 className="text-lg font-medium text-foreground mb-2">Henüz deney yok</h3>
               <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
-                Create your first experiment to start collecting behavioral research data.
+                Davranışsal araştırma verisi toplamaya başlamak için ilk deneyinizi oluşturun.
               </p>
               <Button onClick={handleCreateExperiment}>
                 <Plus className="h-4 w-4 mr-2" />
-                Create First Experiment
+                İlk Deneyi Oluştur
               </Button>
             </CardContent>
           </Card>
