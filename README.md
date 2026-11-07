@@ -129,8 +129,11 @@ VITE_SUPABASE_PROJECT_ID=...
 - [ ] Panelde katılımcı sayısı ve temel istatistikler
 - [ ] Deney kopyalama
 
-## Geliştirici
+## Geliştiriciler
 
-**Hüseyin Enes Atasoy** · Selçuk Üniversitesi Psikoloji
+PsycheTrack iki kişilik bir ekip tarafından geliştiriliyor.
+
+- **Hüseyin Enes Atasoy** · Selçuk Üniversitesi Psikoloji
+- **Mehmet Demirel**
 
 Proje [Lovable](https://lovable.dev) ile geliştirildi.
